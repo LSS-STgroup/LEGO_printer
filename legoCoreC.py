@@ -293,26 +293,47 @@ class LEGOPrinter:
 # change txt to numpy
 def open_points(name):
     all_points = []
+    flag = False
     with open(name, 'r') as file_to_read:
+        first = True
         while True:
             lines = file_to_read.readline()
             if not lines:
                 break
                 pass
-            x_tmp, y_tmp = [float(i) for i in lines.split()]
-            all_points.append([x_tmp, y_tmp])
-    data = np.array(all_points)
-    point = data[np.lexsort(data.T)]
-    return point
+            if not first:
+                x_tmp, y_tmp = [float(i) for i in lines.split()]
+                all_points.append([x_tmp, y_tmp])
+            if first:
+                if lines == "A\n":
+                    flag = True
+                    first = False
+                else:
+                    flag = False
+                    break
+                    pass
+
+    if flag:
+        data = np.array(all_points)
+        point = data[np.lexsort(data.T)]
+    else:
+        point = [[-1, -1]]
+    return point, flag
 
 
 if __name__ == "__main__":
     LP = LEGOPrinter()
     c_time = time.time()
     filename = 'myfile.txt'
-    raw_point = open_points(filename)
-    print(raw_point)
-    # raw_point = [[1,10],[100,50],[200,100],[300,200],[1,10],[100,50],[200,100],[300,200]]
-    LP.point_transfer(raw_point)
-    c_time = time.time() - c_time
-    print("take time:" + str(c_time))
+    while True:
+        raw_point, flag = open_points(filename)
+        # raw_point = [[1,10],[100,50],[200,100],[300,200],[1,10],[100,50],[200,100],[300,200]]
+        if flag:
+            print("start print")
+            print(raw_point)
+            LP.point_transfer(raw_point)
+            # c_time = time.time() - c_time
+            # print("take time:" + str(c_time))
+        else:
+            print("wait")
+            sleep(1)
